@@ -99,7 +99,6 @@ def get_group_members(
 def add_group_member(
     group_id: int,
     user_id: int,
-    current_user: Annotated[User, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)]
 ):
     group = db_session.query(Group).filter(Group.id == group_id).first()
