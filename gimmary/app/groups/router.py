@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from gimmary.app.auth.utils import get_current_user
 from gimmary.app.groups.schemes import GroupCreateRequest, GroupResponse, GroupUpdateRequest, UserResponse, MissionResponse
 from gimmary.database.connection import get_db_session
-from gimmary.database.models import Group, User
+from gimmary.database.models import Group, GroupMember, User
 from sqlalchemy.orm import Session
 
 
@@ -138,23 +138,35 @@ def create_group(
     request: GroupCreateRequest,
     current_user: Annotated[User, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)]
-) -> GroupResponse:
-    group = Group(
-        team_id=request.team_id,
-        name=request.name,
-        leader_id=current_user.id,
-        created_at=request.created_at
-    )
-    db_session.add(group)
-    db_session.commit()
-    db_session.refresh(group)
-    return GroupResponse(
-        id=group.id,
-        name=group.name,
-        admin_id=group.admin_id,
-        auth_code=group.auth_code,
-        created_at=group.created_at.isoformat() if group.created_at else None
-    )
+) -> list[GroupResponse]:
+    members = db_session.query(User).filter(User.team_id == request.team_id).all()
+    teams = [[] for _ in range(len(members)//4+1)]
+    for i, member in enumerate(members):
+        teams[i//4].append(member)
+    for i, members in enumerate(teams):
+        group = Group(
+            team_id=request.team_id,
+            name=f"{i+1}조",
+            leader_id=members[0].id,
+        )
+        db_session.add(group)
+        db_session.commit()
+        db_session.refresh(group)
+        for member in members:
+            group_member = GroupMember(group_id=group.id, user_id=member.id)
+            db_session.add(group_member)
+        db_session.commit()
+    groups = db_session.query(Group).filter(Group.team_id == request.team_id).all()
+    return [
+        GroupResponse(
+            id=group.id,
+            team_id=group.team_id,
+            name=group.name,
+            leader_id=group.leader_id,
+            created_at=group.created_at.isoformat() if group.created_at else None
+        )
+        for group in groups
+    ]
 
 @groups_router.patch("/{group_id}")
 def update_group(
@@ -185,8 +197,7 @@ def update_group(
     return GroupResponse(
         id=group.id,
         name=group.name,
-        admin_id=group.admin_id,
-        auth_code=group.auth_code,
+        leader_id=group.leader_id,
         created_at=group.created_at.isoformat() if group.created_at else None
     )
 
