@@ -8,6 +8,9 @@ from authlib.jose import jwt
 from authlib.jose.errors import JoseError
 
 from gimmary.app.auth.settings import AUTH_SETTINGS
+from gimmary.database.models import User
+from gimmary.database.connection import get_db_session
+
 
 HTTP_BEARER = HTTPBearer()
 
@@ -54,3 +57,10 @@ def refresh_token(token: Annotated[str | None, Depends(get_header_token)] = None
 
 def login_with_header(token: Annotated[str | None, Depends(get_header_token)] = None) -> str:
   return verify_token(token, AUTH_SETTINGS.ACCESS_TOKEN_SECRET, "access")
+
+def get_current_user(user_id: Annotated[str, Depends(login_with_header)]) -> str:
+  db_session = get_db_session()
+  user = db_session.query(User).filter(User.id == user_id).first()
+  if not user:
+    raise HTTPException(status_code=404, detail="User not found")
+  return user
