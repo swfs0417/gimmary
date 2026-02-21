@@ -396,6 +396,18 @@ wheels = [
 ]
 
 [[package]]
+name = "fastapi-middleware"
+version = "0.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "fastapi" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4f/60/65ef4ff66187762a2bb251b54e2b11ade270dd1828f6d43638aae2a07c66/fastapi_middleware-0.2.1.tar.gz", hash = "sha256:4adfa55f3fb4a063e5854160d60d6aea2b465bb8f3723cefbaf0acb074a36d81", size = 5317, upload-time = "2024-10-28T06:27:31.458Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b3/3a/7aa49fb407bd9edbeee91b0a4cc6cb9ff0113142853cc0ab484296ce000a/fastapi_middleware-0.2.1-py3-none-any.whl", hash = "sha256:070aadcbf2716545db618c90750ddae9975b5ff762fef54ba29cea8b9d8f0faa", size = 6711, upload-time = "2024-10-28T06:27:29.163Z" },
+]
+
+[[package]]
 name = "ffmpy"
 version = "1.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -431,6 +443,7 @@ dependencies = [
     { name = "argon2-cffi" },
     { name = "authlib" },
     { name = "fastapi" },
+    { name = "fastapi-middleware" },
     { name = "gradio" },
     { name = "joserfc" },
     { name = "kornia" },
@@ -451,6 +464,7 @@ requires-dist = [
     { name = "argon2-cffi", specifier = ">=25.1.0" },
     { name = "authlib", specifier = ">=1.6.8" },
     { name = "fastapi", specifier = ">=0.129.0" },
+    { name = "fastapi-middleware", specifier = ">=0.2.1" },
     { name = "gradio", specifier = ">=6.6.0" },
     { name = "joserfc", specifier = ">=1.6.2" },
     { name = "kornia", specifier = ">=0.8.2" },
