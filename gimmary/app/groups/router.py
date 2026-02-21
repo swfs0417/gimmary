@@ -61,14 +61,14 @@ def get_group_missions(
         raise HTTPException(status_code=403, detail="User does not belong to this group")
     return [
         MissionResponse(
-            id=mission.id,
-            group_id=mission.group_id,
-            title=mission.title,
-            description=mission.description,
-            status=mission.status,
-            created_at=mission.created_at.isoformat() if mission.created_at else None
+            id=group_mission.mission.id,
+            group_id=group_mission.group_id,
+            title=group_mission.mission.title,
+            description=group_mission.mission.description,
+            status=group_mission.status,
+            created_at=group_mission.mission.created_at.isoformat() if group_mission.mission.created_at else None
         )
-        for mission in group.group_missions
+        for group_mission in group.group_missions
 
     ]
     
