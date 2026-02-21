@@ -368,6 +368,7 @@ def download_model(filename: str):
     except Exception as e:
       # 압축 실패 시 원본 파일로 폴백
       # 로그는 details에 남기던 기존 방식과 달리 여기선 예외 무시
+      print(e)
       pass
 
   return FileResponse(path, media_type="model/gltf-binary", filename=filename)
