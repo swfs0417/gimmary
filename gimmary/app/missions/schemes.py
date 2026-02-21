@@ -20,6 +20,7 @@ class MissionResponse(BaseModel):
   description: str
   points: int
   created_at: str
+  model_url: str | None = None
 
 # ── GroupMission (그룹별 달성 상태) ─────────────────
 

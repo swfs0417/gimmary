@@ -54,6 +54,7 @@ def create_mission(
     description=mission.description,
     points=mission.points,
     created_at=mission.created_at.isoformat(),
+    model_url=mission.model_url,
   )
 
 
@@ -72,6 +73,7 @@ def get_mission(
     description=mission.description,
     points=mission.points,
     created_at=mission.created_at.isoformat() if mission.created_at else "",
+    model_url=mission.model_url,
   )
 
 
@@ -110,6 +112,7 @@ def update_mission(
     description=mission.description,
     points=mission.points,
     created_at=mission.created_at.isoformat() if mission.created_at else "",
+    model_url=mission.model_url,
   )
 
 
@@ -280,6 +283,10 @@ async def submit_group_mission(
 
         # 상태 업데이트
         gm.status = MissionStatus.SUCCESS.value
+        # 미션 모델 URL 저장
+        mission = db.query(Mission).filter(Mission.id == mission_id).first()
+        if mission:
+          mission.model_url = f"/missions/downloads/{dest_name}"
         db.commit()
 
         details.update({
