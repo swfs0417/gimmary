@@ -18,6 +18,7 @@ from fastapi.responses import FileResponse
 from pathlib import Path
 import os
 import uuid
+import subprocess
 
 router = APIRouter(prefix="/missions", tags=["missions"])
 
@@ -283,16 +284,45 @@ async def submit_group_mission(
         final_path = downloads_dir / dest_name
         Path(gen["mesh_path"]).replace(final_path)
 
-        # 상태 업데이트
-        # 미션 모델 URL 저장
+        # 시도: gltf-pipeline을 사용해 Draco 압축 수행
+        compressed_name = f"model_{gm.id}_{uuid.uuid4().hex}_draco.glb"
+        compressed_path = downloads_dir / compressed_name
+        compression_ok = False
+        try:
+          res = subprocess.run([
+            "gltf-pipeline",
+            "-i",
+            str(final_path),
+            "-o",
+            str(compressed_path),
+            "-d",
+          ], check=True, capture_output=True, text=True, timeout=120)
+          if compressed_path.exists():
+            compression_ok = True
+            # 원본 삭제(안전하게 시도)
+            try:
+              final_path.unlink()
+            except Exception:
+              pass
+            used_name = compressed_name
+            # 로그에 실행 결과 추가
+            details["log"] = (details.get("log", "") + "\n" + res.stdout).strip()
+          else:
+            used_name = dest_name
+        except Exception as e:
+          # 압축 실패하면 원본 사용, 로그에 남김
+          details["log"] = (details.get("log", "") + "\nCompression failed: " + str(e)).strip()
+          used_name = dest_name
+
+        # 상태 업데이트: 미션 모델 URL 저장
         mission = db.query(Mission).filter(Mission.id == mission_id).first()
         if mission:
-          mission.model_url = f"/missions/downloads/{dest_name}"
+          mission.model_url = f"/missions/downloads/{used_name}"
         db.commit()
 
         details.update({
           "model_generated": True,
-          "download_url": f"/missions/downloads/{dest_name}",
+          "download_url": f"/missions/downloads/{used_name}",
         })
       else:
         details["model_generated"] = False
@@ -305,7 +335,39 @@ async def submit_group_mission(
 
 @router.get("/downloads/{filename}")
 def download_model(filename: str):
-  path = Path("downloads") / filename
+  downloads_dir = Path("downloads")
+  path = downloads_dir / filename
   if not path.exists():
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
+
+  # 레거시: 파일이 100MB를 넘으면 서버 측에서 Draco 압축을 시도해 전송
+  MAX_BYTES = 100 * 1024 * 1024
+  try:
+    size = path.stat().st_size
+  except Exception:
+    size = 0
+
+  # 이미 압축된 파일은 재압축 방지
+  is_already_draco = "_draco" in filename
+  if size > MAX_BYTES and not is_already_draco:
+    compressed_name = f"{Path(filename).stem}_draco.glb"
+    compressed_path = downloads_dir / compressed_name
+    try:
+      # gltf-pipeline으로 Draco 압축 시도 (타임아웃 120s)
+      subprocess.run([
+        "gltf-pipeline",
+        "-i",
+        str(path),
+        "-o",
+        str(compressed_path),
+        "-d",
+      ], check=True, capture_output=True, text=True, timeout=120)
+      if compressed_path.exists():
+        # 압축 성공 시 압축 파일을 전송
+        return FileResponse(compressed_path, media_type="model/gltf-binary", filename=compressed_name)
+    except Exception as e:
+      # 압축 실패 시 원본 파일로 폴백
+      # 로그는 details에 남기던 기존 방식과 달리 여기선 예외 무시
+      pass
+
   return FileResponse(path, media_type="model/gltf-binary", filename=filename)
