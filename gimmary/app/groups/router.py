@@ -19,10 +19,10 @@ def my_groups(
     return [
         GroupResponse(
             id=membership.group.id,
+            team_id=membership.group.team_id,
             name=membership.group.name,
-            admin_id=membership.group.leader_id,
-            auth_code=None,
-            created_at=membership.group.created_at.isoformat() if membership.group.created_at else None
+            leader_id=membership.group.leader_id,
+            created_at=membership.group.created_at.isoformat() if membership.group.created_at else ""
         )
         for membership in current_user.groups
     ]
@@ -41,10 +41,10 @@ def get_group(
         raise HTTPException(status_code=403, detail="User does not belong to this group")
     return GroupResponse(
         id=group.id,
+        team_id=group.team_id,
         name=group.name,
-        admin_id=group.leader_id,
-        auth_code=None,
-        created_at=group.created_at.isoformat() if group.created_at else None
+        leader_id=group.leader_id,
+        created_at=group.created_at.isoformat() if group.created_at else ""
     )
 
 @groups_router.get("/{group_id}/missions")
@@ -187,7 +187,8 @@ def update_group(
         new_leader = db_session.query(User).filter(User.id == request.leader_id).first()
         if not new_leader:
             raise HTTPException(status_code=404, detail="New leader user not found")
-        if new_leader not in group.members:
+        member_ids = [m.user_id for m in group.members]
+        if new_leader.id not in member_ids:
             raise HTTPException(status_code=400, detail="New leader must be a member of the group")
         group.leader_id = request.leader_id
     if request.name is not None:
@@ -198,9 +199,10 @@ def update_group(
     db_session.refresh(group)
     return GroupResponse(
         id=group.id,
+        team_id=group.team_id,
         name=group.name,
         leader_id=group.leader_id,
-        created_at=group.created_at.isoformat() if group.created_at else None
+        created_at=group.created_at.isoformat() if group.created_at else ""
     )
 
 @groups_router.delete("/{group_id}", status_code=204)
