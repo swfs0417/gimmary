@@ -3,8 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 
 from gimmary.app.auth.utils import get_current_user
-from gimmary.app.groups.schemes import GroupCreateRequest, GroupResponse, GroupUpdateRequest, UserResponse
-from gimmary.app.missions.schemes import MissionResponse
+from gimmary.app.groups.schemes import GroupCreateRequest, GroupResponse, GroupUpdateRequest, UserResponse, MissionResponse
 from gimmary.database.connection import get_db_session
 from gimmary.database.models import Group, User
 from sqlalchemy.orm import Session
