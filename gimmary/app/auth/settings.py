@@ -4,7 +4,7 @@ from gimmary.settings import SETTINGS
 class AuthSettings(BaseSettings):
     ACCESS_TOKEN_SECRET: str
     REFRESH_TOKEN_SECRET: str
-    SHORT_SESSION_LIFESPAN: int = 15
+    SHORT_SESSION_LIFESPAN: int = 150
     LONG_SESSION_LIFESPAN: int = 24 * 60
 
     model_config = SettingsConfigDict(
