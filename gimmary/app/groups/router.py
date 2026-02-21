@@ -18,13 +18,13 @@ def my_groups(
 ) -> list[GroupResponse]:
     return [
         GroupResponse(
-            id=group.id,
-            name=group.name,
-            admin_id=group.admin_id,
-            auth_code=group.auth_code,
-            created_at=group.created_at.isoformat() if group.created_at else None
+            id=membership.group.id,
+            name=membership.group.name,
+            admin_id=membership.group.leader_id,
+            auth_code=None,
+            created_at=membership.group.created_at.isoformat() if membership.group.created_at else None
         )
-        for group in current_user.groups
+        for membership in current_user.groups
     ]
 
 @groups_router.get("/{group_id}")
@@ -36,13 +36,14 @@ def get_group(
     group = db_session.query(Group).filter(Group.id == group_id).first()
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
-    if group not in current_user.groups:
+    member_ids = [m.user_id for m in group.members]
+    if current_user.id not in member_ids:
         raise HTTPException(status_code=403, detail="User does not belong to this group")
     return GroupResponse(
         id=group.id,
         name=group.name,
-        admin_id=group.admin_id,
-        auth_code=group.auth_code,
+        admin_id=group.leader_id,
+        auth_code=None,
         created_at=group.created_at.isoformat() if group.created_at else None
     )
 
@@ -55,7 +56,8 @@ def get_group_missions(
     group = db_session.query(Group).filter(Group.id == group_id).first()
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
-    if group not in current_user.groups:
+    member_ids = [m.user_id for m in group.members]
+    if current_user.id not in member_ids:
         raise HTTPException(status_code=403, detail="User does not belong to this group")
     return [
         MissionResponse(
