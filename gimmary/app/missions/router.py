@@ -19,8 +19,46 @@ from pathlib import Path
 import os
 import uuid
 import subprocess
+import shutil
+import logging
 
 router = APIRouter(prefix="/missions", tags=["missions"])
+
+logger = logging.getLogger(__name__)
+
+
+def _find_gltf_pipeline() -> list | None:
+  """Return command list to run gltf-pipeline, or None if not available.
+
+  Tries in order:
+  - executable on PATH (`gltf-pipeline`)
+  - `npx gltf-pipeline` if `npx` is available
+  - common global npm bin locations
+  """
+  # 1) direct on PATH
+  exe = shutil.which("gltf-pipeline")
+  if exe:
+    return [exe]
+
+  # 2) npx wrapper
+  npx = shutil.which("npx")
+  if npx:
+    return [npx, "gltf-pipeline"]
+
+  # 3) try common global locations
+  candidates = [
+    Path(os.path.expanduser("~/.npm-global/bin/gltf-pipeline")),
+    Path("/usr/local/bin/gltf-pipeline"),
+    Path("/usr/bin/gltf-pipeline"),
+  ]
+  for p in candidates:
+    try:
+      if p.exists():
+        return [str(p)]
+    except Exception:
+      continue
+
+  return None
 
 
 @router.post("/", response_model=MissionResponse)
@@ -289,14 +327,11 @@ async def submit_group_mission(
         compressed_path = downloads_dir / compressed_name
         compression_ok = False
         try:
-          res = subprocess.run([
-            "gltf-pipeline",
-            "-i",
-            str(final_path),
-            "-o",
-            str(compressed_path),
-            "-d",
-          ], check=True, capture_output=True, text=True, timeout=120)
+          cmd_prefix = _find_gltf_pipeline()
+          if not cmd_prefix:
+            raise FileNotFoundError("gltf-pipeline executable not found")
+          cmd = cmd_prefix + ["-i", str(final_path), "-o", str(compressed_path), "-d"]
+          res = subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=120)
           if compressed_path.exists():
             compression_ok = True
             # 원본 삭제(안전하게 시도)
@@ -311,6 +346,7 @@ async def submit_group_mission(
             used_name = dest_name
         except Exception as e:
           # 압축 실패하면 원본 사용, 로그에 남김
+          logger.exception("gltf-pipeline compression failed during generation")
           details["log"] = (details.get("log", "") + "\nCompression failed: " + str(e)).strip()
           used_name = dest_name
 
@@ -347,21 +383,18 @@ def download_model(filename: str):
     compressed_path = downloads_dir / compressed_name
     try:
       # gltf-pipeline으로 Draco 압축 시도 (타임아웃 120s)
-      subprocess.run([
-        "gltf-pipeline",
-        "-i",
-        str(path),
-        "-o",
-        str(compressed_path),
-        "-d",
-      ], check=True, capture_output=True, text=True, timeout=120)
-      if compressed_path.exists():
-        # 압축 성공 시 압축 파일을 전송
-        return FileResponse(compressed_path, media_type="model/gltf-binary", filename=compressed_name)
+      cmd_prefix = _find_gltf_pipeline()
+      if cmd_prefix:
+        cmd = cmd_prefix + ["-i", str(path), "-o", str(compressed_path), "-d"]
+        subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=120)
+        if compressed_path.exists():
+          # 압축 성공 시 압축 파일을 전송
+          return FileResponse(compressed_path, media_type="model/gltf-binary", filename=compressed_name)
+      else:
+        logger.debug("gltf-pipeline not found; skipping compression on download")
     except Exception as e:
       # 압축 실패 시 원본 파일로 폴백
-      # 로그는 details에 남기던 기존 방식과 달리 여기선 예외 무시
-      print(e)
+      logger.exception("gltf-pipeline compression failed during download")
       pass
 
   return FileResponse(path, media_type="model/gltf-binary", filename=filename)
