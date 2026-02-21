@@ -147,6 +147,8 @@ def create_group(
     for i, member in enumerate(members):
         teams[i//4].append(member)
     for i, members in enumerate(teams):
+        if not members:
+          continue
         group = Group(
             team_id=request.team_id,
             name=f"{i+1}조",
