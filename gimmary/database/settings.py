@@ -13,7 +13,7 @@ class DatabaseSettings(BaseSettings):
 
     @property
     def url(self) -> str:
-        return f"{self.dialect}+{self.driver}://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+        return f"{self.dialect}+{self.driver}://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}?charset=utf8mb4"
 
     model_config = SettingsConfigDict(
         case_sensitive=False,
