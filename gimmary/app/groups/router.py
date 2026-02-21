@@ -105,8 +105,6 @@ def add_group_member(
     group = db_session.query(Group).filter(Group.id == group_id).first()
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
-    if group.leader_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Only the group leader can add members")
     user = db_session.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
