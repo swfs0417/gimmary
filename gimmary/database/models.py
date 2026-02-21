@@ -21,7 +21,7 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     login_id = Column(String(50), unique=True, nullable=False)
-    username = Column(String(50), unique=True, nullable=False)
+    username = Column(String(50), nullable=False)
     password_hash = Column(String(128), nullable=False)
     gender = Column(String(10))
     student_id = Column(String(10), unique=True)
