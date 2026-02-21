@@ -8,3 +8,10 @@ class UserCreateRequest(BaseModel):
     gender: Gender
     student_id: str
     mbti: str
+
+class LoginRequest(BaseModel):
+    login_id: str
+    password: str
+
+class LoginResponse(BaseModel):
+    access_token: str

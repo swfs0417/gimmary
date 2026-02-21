@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from gimmary.database.connection import get_db_session
@@ -12,3 +12,6 @@ class UserRepository:
         self.session.add(user)
         self.session.commit()
         return user
+    
+    def find_by_login_id(self, login_id: str) -> Optional[User]:
+        return self.session.query(User).filter(User.login_id == login_id).first()
