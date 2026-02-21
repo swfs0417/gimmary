@@ -35,7 +35,6 @@ class UserService:
             str(user.id),
             AUTH_SETTINGS.SHORT_SESSION_LIFESPAN,
             AUTH_SETTINGS.ACCESS_TOKEN_SECRET,
-            "access"
         )
         
         return LoginResponse(
