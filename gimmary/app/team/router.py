@@ -4,9 +4,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from gimmary.database.connection import get_db_session
-from gimmary.database.models import Team, TeamMember, User, UserRole
+from gimmary.database.models import Team, TeamMember, User, UserRole, Mission
 from gimmary.app.auth.utils import get_current_user
 from gimmary.app.team.schemas import TeamCreateRequest, TeamJoinRequest, TeamMemberResponse, TeamResponse, TeamUpdateRequest, MyTeamResponse, create_auth_code
+from gimmary.app.missions.schemes import MissionResponse
 
 team_router = APIRouter(prefix="/teams", tags=["teams"])
 
@@ -114,3 +115,20 @@ def join_team(
         role=team_member.role
     )
 
+@team_router.get("/{team_id}/missions", response_model=list[MissionResponse])
+def get_team_missions(
+    team_id: int,
+    db_session: Annotated[Session, Depends(get_db_session)]
+):
+    missions = db_session.query(Mission).filter(Mission.team_id == team_id).all()
+
+    return [
+        MissionResponse(
+            id=m.id,
+            team_id=m.team_id,
+            title=m.title,
+            description=m.description,
+            created_at=m.created_at.isoformat() if m.created_at else "",
+        )
+        for m in missions
+    ]

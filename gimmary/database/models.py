@@ -49,6 +49,7 @@ class Team(Base):
     created_at = Column(DateTime)
     groups = relationship('Group', back_populates='team')
     leaderboard = relationship('Leaderboard', back_populates='team')
+    missions = relationship('Mission', back_populates='team')
 
 class TeamMember(Base):
     __tablename__ = 'team_members'
@@ -69,7 +70,7 @@ class Group(Base):
     created_at = Column(DateTime)
     team = relationship('Team', back_populates='groups')
     members = relationship('GroupMember', back_populates='group')
-    missions = relationship('Mission', back_populates='group')
+    group_missions = relationship('GroupMission', back_populates='group')
 
 class GroupMember(Base):
     __tablename__ = 'group_members'
@@ -88,13 +89,21 @@ class MissionStatus(Enum):
 class Mission(Base):
     __tablename__ = 'missions'
     id = Column(Integer, primary_key=True)
-    group_id = Column(Integer, ForeignKey('groups.id'))
+    team_id = Column(Integer, ForeignKey('teams.id'))
     title = Column(String(100))
     description = Column(Text)
-    status = Column(String(20), default=MissionStatus.PENDING.value)  # 'pending', 'success', 'fail'
-    decided_by_admin = Column(Boolean, default=False)
     created_at = Column(DateTime)
-    group = relationship('Group', back_populates='missions')
+    team = relationship('Team', back_populates='missions')
+    group_missions = relationship('GroupMission', back_populates='mission')
+
+class GroupMission(Base):
+    __tablename__ = 'group_missions'
+    id = Column(Integer, primary_key=True)
+    mission_id = Column(Integer, ForeignKey('missions.id'))
+    group_id = Column(Integer, ForeignKey('groups.id'))
+    status = Column(String(20), default=MissionStatus.PENDING.value)
+    mission = relationship('Mission', back_populates='group_missions')
+    group = relationship('Group', back_populates='group_missions')
 
 class Leaderboard(Base):
     __tablename__ = 'leaderboards'
