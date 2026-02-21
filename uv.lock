@@ -259,7 +259,6 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "alembic" },
-    { name = "argon2" },
     { name = "argon2-cffi" },
     { name = "authlib" },
     { name = "fastapi" },
@@ -273,7 +272,6 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "alembic", specifier = ">=1.18.4" },
-    { name = "argon2", specifier = ">=0.1.10" },
     { name = "argon2-cffi", specifier = ">=25.1.0" },
     { name = "authlib", specifier = ">=1.6.8" },
     { name = "fastapi", specifier = ">=0.129.0" },
