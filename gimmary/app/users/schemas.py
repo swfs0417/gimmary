@@ -15,3 +15,4 @@ class LoginRequest(BaseModel):
 
 class LoginResponse(BaseModel):
     access_token: str
+    has_admin_team: bool

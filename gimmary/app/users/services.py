@@ -38,4 +38,6 @@ class UserService:
         )
         
         return LoginResponse(
-            access_token=access_token)
+            access_token=access_token,
+            has_admin_team=self.user_repository.has_admin_team(user.id)
+        )
