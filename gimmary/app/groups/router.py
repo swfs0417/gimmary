@@ -81,8 +81,6 @@ def get_group_members(
     group = db_session.query(Group).filter(Group.id == group_id).first()
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
-    if group not in current_user.groups:
-        raise HTTPException(status_code=403, detail="User does not belong to this group")
     return [
         UserResponse(
             id=member.id,
@@ -112,6 +110,7 @@ def add_group_member(
     group.members.append(user)
     db_session.add(group)
     db_session.commit()
+
 @groups_router.delete("/{group_id}/members/{user_id}")
 def remove_group_member(
     group_id: int,
