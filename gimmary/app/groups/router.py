@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from gimmary.app.auth.utils import get_current_user
 from gimmary.app.groups.schemes import GroupCreateRequest, GroupResponse, GroupUpdateRequest, UserResponse, MissionResponse
 from gimmary.database.connection import get_db_session
-from gimmary.database.models import Group, GroupMember, TeamMember, User
+from gimmary.database.models import Group, GroupMember, Team, TeamMember, User
 from sqlalchemy.orm import Session
 
 
@@ -142,7 +142,12 @@ def create_group(
     current_user: Annotated[User, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)]
 ) -> list[GroupResponse]:
-    members = db_session.query(TeamMember).filter(TeamMember.team_id == request.team_id).all()
+    members = db_session.query(TeamMember).filter(TeamMember.team_id == request.team_id and not (member.user_id for member in Group.members)).all()
+    existing_member_ids = set()
+    for group in db_session.query(Group).filter(Group.team_id == request.team_id).all():
+        for member in group.members:
+            existing_member_ids.add(member.id)
+    members = [member for member in members if member.user_id not in existing_member_ids]
     teams = [[] for _ in range(len(members)//4+1)]
     for i, member in enumerate(members):
         teams[i//4].append(member)
@@ -151,7 +156,7 @@ def create_group(
           continue
         group = Group(
             team_id=request.team_id,
-            name=f"{i+1}조",
+            name=f"{len(db_session.query(Group).filter(Group.team_id == request.team_id).all())+1}조",
             leader_id=members[0].user_id,
         )
         db_session.add(group)
