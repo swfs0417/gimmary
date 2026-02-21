@@ -3,8 +3,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from gimmary.app.groups.schemes import GroupResponse
 from gimmary.database.connection import get_db_session
-from gimmary.database.models import Team, TeamMember, User, UserRole, Mission
+from gimmary.database.models import Group, Team, TeamMember, User, UserRole, Mission
 from gimmary.app.auth.utils import get_current_user
 from gimmary.app.team.schemas import TeamCreateRequest, TeamJoinRequest, TeamMemberResponse, TeamResponse, TeamUpdateRequest, MyTeamResponse, create_auth_code
 from gimmary.app.missions.schemes import MissionResponse
@@ -155,4 +156,21 @@ def get_team_members(
             role=m.role
         )
         for m in team_members
+    ]
+
+@team_router.get("/{team_id}/groups", response_model=list[GroupResponse])
+def get_team_groups(
+    team_id: int,
+    db_session: Annotated[Session, Depends(get_db_session)]
+):
+    groups = db_session.query(Group).filter(Group.team_id == team_id).all()
+    return [
+        GroupResponse(
+            id=g.id,
+            team_id=g.team_id,
+            name=g.name,
+            leader_id=g.leader_id,
+            created_at=g.created_at.isoformat() if g.created_at else ""
+        )
+        for g in groups
     ]
