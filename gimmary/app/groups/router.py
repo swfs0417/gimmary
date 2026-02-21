@@ -85,11 +85,11 @@ def get_group_members(
         UserResponse(
             id=member.id,
             login_id=member.user.login_id,
-            username=member.username,
-            gender=member.gender,
-            student_id=member.student_id,
-            hakbun=member.hakbun,
-            mbti=member.mbti
+            username=member.user.username,
+            gender=member.user.gender,
+            student_id=member.user.student_id,
+            hakbun=member.user.hakbun,
+            mbti=member.user.mbti
         )
         for member in group.members
     ]
