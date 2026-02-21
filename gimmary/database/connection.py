@@ -1,7 +1,7 @@
 from typing import AsyncGenerator, Any
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
-from wapang.database.settings import DB_SETTINGS
+from gimmary.database.settings import DB_SETTINGS
 
 
 class DatabaseManager:

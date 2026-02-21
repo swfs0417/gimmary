@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from wapang.settings import SETTINGS
+from gimmary.settings import SETTINGS
 
 
 class DatabaseSettings(BaseSettings):
