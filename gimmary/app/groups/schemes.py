@@ -15,3 +15,12 @@ class GroupResponse(BaseModel):
 class GroupUpdateRequest(BaseModel):
   name: str | None
   leader_id: int | None
+
+class UserResponse(BaseModel):
+  id: int
+  login_id: str
+  username: str
+  gender: str
+  student_id: str
+  hakbun: int
+  mbti: str

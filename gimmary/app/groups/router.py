@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 
 from gimmary.app.auth.utils import get_current_user
-from gimmary.app.groups.schemes import GroupCreateRequest, GroupResponse, GroupUpdateRequest
+from gimmary.app.groups.schemes import GroupCreateRequest, GroupResponse, GroupUpdateRequest, UserResponse
 from gimmary.app.missions.schemes import MissionResponse
 from gimmary.database.connection import get_db_session
 from gimmary.database.models import Group, User
@@ -76,13 +76,24 @@ def get_group_members(
     group_id: int,
     current_user: Annotated[User, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)]
-) -> list[User]:
+) -> list[UserResponse]:
     group = db_session.query(Group).filter(Group.id == group_id).first()
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
     if group not in current_user.groups:
         raise HTTPException(status_code=403, detail="User does not belong to this group")
-    return group.members
+    return [
+        UserResponse(
+            id=member.id,
+            login_id=member.login_id,
+            username=member.username,
+            gender=member.gender,
+            student_id=member.student_id,
+            hakbun=member.hakbun,
+            mbti=member.mbti
+        )
+        for member in group.members
+    ]
 @groups_router.post("/{group_id}/members")
 def add_group_member(
     group_id: int,
