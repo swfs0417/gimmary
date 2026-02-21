@@ -128,6 +128,7 @@ def get_team_missions(
             team_id=m.team_id,
             title=m.title,
             description=m.description,
+            points=m.points,
             created_at=m.created_at.isoformat() if m.created_at else "",
         )
         for m in missions

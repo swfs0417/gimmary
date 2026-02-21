@@ -92,6 +92,7 @@ class Mission(Base):
     team_id = Column(Integer, ForeignKey('teams.id'))
     title = Column(String(100))
     description = Column(Text)
+    points = Column(Integer, default=0)
     created_at = Column(DateTime)
     team = relationship('Team', back_populates='missions')
     group_missions = relationship('GroupMission', back_populates='mission')

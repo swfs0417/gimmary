@@ -33,6 +33,7 @@ def create_mission(
     team_id=request.team_id,
     title=request.title,
     description=request.description,
+    points=request.points,
     created_at=datetime.utcnow(),
   )
   db.add(mission)
@@ -43,6 +44,7 @@ def create_mission(
     team_id=mission.team_id,
     title=mission.title,
     description=mission.description,
+    points=mission.points,
     created_at=mission.created_at.isoformat(),
   )
 
@@ -60,6 +62,7 @@ def get_mission(
     team_id=mission.team_id,
     title=mission.title,
     description=mission.description,
+    points=mission.points,
     created_at=mission.created_at.isoformat() if mission.created_at else "",
   )
 
@@ -87,6 +90,8 @@ def update_mission(
     mission.title = request.title
   if request.description is not None:
     mission.description = request.description
+  if request.points is not None:
+    mission.points = request.points
 
   db.commit()
   db.refresh(mission)
@@ -95,6 +100,7 @@ def update_mission(
     team_id=mission.team_id,
     title=mission.title,
     description=mission.description,
+    points=mission.points,
     created_at=mission.created_at.isoformat() if mission.created_at else "",
   )
 
