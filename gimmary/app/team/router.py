@@ -134,3 +134,25 @@ def get_team_missions(
         )
         for m in missions
     ]
+
+@team_router.get("/{team_id}/members", response_model=list[TeamMemberResponse])
+def get_team_members(
+    team_id: int,
+    db_session: Annotated[Session, Depends(get_db_session)]
+):
+    team_members = db_session.query(TeamMember).filter(TeamMember.team_id == team_id).all()
+    
+    if not team_members:
+        raise HTTPException(status_code=404, detail="Team not found or has no members")
+    return [
+        TeamMemberResponse(
+            id=m.id,
+            team_id=m.team_id,
+            user_id=m.user_id,
+            user_name=m.user.username,
+            user_student_id=m.user.student_id,
+            user_hakbun=m.user.hakbun,
+            role=m.role
+        )
+        for m in team_members
+    ]
