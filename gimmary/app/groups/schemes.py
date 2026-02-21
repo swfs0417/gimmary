@@ -24,3 +24,11 @@ class UserResponse(BaseModel):
   student_id: str
   hakbun: int
   mbti: str
+
+class MissionResponse(BaseModel):
+  id: int
+  group_id: int
+  title: str
+  description: str
+  status: str
+  created_at: str

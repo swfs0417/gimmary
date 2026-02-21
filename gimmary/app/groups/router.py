@@ -65,7 +65,6 @@ def get_group_missions(
             title=mission.title,
             description=mission.description,
             status=mission.status,
-            decided_by_admin=bool(mission.decided_by_admin),
             created_at=mission.created_at.isoformat() if mission.created_at else None
         )
         for mission in group.missions
