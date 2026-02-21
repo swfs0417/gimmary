@@ -121,6 +121,27 @@ def delete_mission(
   db.commit()
 
 
+@router.get("/{mission_id}/groups", response_model=list[GroupMissionResponse])
+def get_all_group_missions(
+  mission_id: int,
+  db: Annotated[Session, Depends(get_db_session)] = None,
+):
+  mission = db.query(Mission).filter(Mission.id == mission_id).first()
+  if not mission:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mission not found")
+
+  group_missions = db.query(GroupMission).filter(GroupMission.mission_id == mission_id).all()
+
+  return [
+    GroupMissionResponse(
+      id=gm.id,
+      mission_id=gm.mission_id,
+      group_id=gm.group_id,
+      status=gm.status,
+    )
+    for gm in group_missions
+  ]
+
 @router.get("/{mission_id}/groups/{group_id}", response_model=GroupMissionResponse)
 def get_group_mission(
   mission_id: int,
