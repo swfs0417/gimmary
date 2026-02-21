@@ -340,16 +340,9 @@ def download_model(filename: str):
   if not path.exists():
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
 
-  # 레거시: 파일이 100MB를 넘으면 서버 측에서 Draco 압축을 시도해 전송
-  MAX_BYTES = 100 * 1024 * 1024
-  try:
-    size = path.stat().st_size
-  except Exception:
-    size = 0
-
   # 이미 압축된 파일은 재압축 방지
   is_already_draco = "_draco" in filename
-  if size > MAX_BYTES and not is_already_draco:
+  if not is_already_draco:
     compressed_name = f"{Path(filename).stem}_draco.glb"
     compressed_path = downloads_dir / compressed_name
     try:
