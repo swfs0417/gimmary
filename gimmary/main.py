@@ -9,7 +9,7 @@ from gimmary.api import api_router
 app = FastAPI()
 
 app.include_router(api_router, prefix="/api")
-app.add_middleware(CORSMiddleware, allow_origins=["https://wafhk26-web.vercel.app/"], allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["https://wafhk26-web.vercel.app"], allow_methods=["*"], allow_headers=["*"])
 
 
 @app.get('/health')
