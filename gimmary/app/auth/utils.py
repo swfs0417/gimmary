@@ -17,6 +17,9 @@ def verify_password(plain_password: str, hashed_password: str) -> None:
 	except argon2.exceptions.VerifyMismatchError:
 		raise HTTPException(status_code=401, detail='Invalid credentials')
 
+def hash_password(password: str) -> str:
+  return argon2.PasswordHasher().hash(password)
+
 def issue_token(user_id: str, lifespan_minutes: int, secret: str) -> str:
 	header = {'alg': 'HS256'}
 	payload = {
