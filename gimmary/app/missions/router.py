@@ -270,6 +270,8 @@ async def submit_group_mission(
     # 이미지 경로 수집
     pics = db.query(Pictures).filter(Pictures.group_mission_id == gm.id).all()
     image_paths = [p.url for p in pics]
+    gm.status = MissionStatus.SUCCESS.value
+    db.commit()
 
     try:
       gen = generate_3d_model(image_paths, use_verify=True)
@@ -282,7 +284,6 @@ async def submit_group_mission(
         Path(gen["mesh_path"]).replace(final_path)
 
         # 상태 업데이트
-        gm.status = MissionStatus.SUCCESS.value
         # 미션 모델 URL 저장
         mission = db.query(Mission).filter(Mission.id == mission_id).first()
         if mission:

@@ -13,6 +13,7 @@ dependencies = [
     "gradio>=6.6.0",
     "joserfc>=1.6.2",
     "kornia>=0.8.2",
+    "mini-dust3r>=0.1.1",
     "numpy>=2.4.2",
     "opencv-python>=4.13.0.92",
     "pillow>=12.1.1",
