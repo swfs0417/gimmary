@@ -168,7 +168,7 @@ def create_group(
             team_id=group.team_id,
             name=group.name,
             leader_id=group.leader_id,
-            created_at=group.created_at.isoformat() if group.created_at else None
+            created_at=group.created_at.isoformat() if group.created_at else ''
         )
         for group in groups
     ]
