@@ -84,7 +84,7 @@ def get_group_members(
     return [
         UserResponse(
             id=member.id,
-            login_id=member.login_id,
+            login_id=member.user.login_id,
             username=member.username,
             gender=member.gender,
             student_id=member.student_id,
