@@ -6,6 +6,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import argon2
 from authlib.jose import jwt
 from authlib.jose.errors import JoseError
+from sqlalchemy.orm import Session
 
 from gimmary.app.auth.settings import AUTH_SETTINGS
 from gimmary.database.models import User
@@ -59,8 +60,10 @@ def refresh_token(token: Annotated[str | None, Depends(get_header_token)] = None
 def login_with_header(token: Annotated[str | None, Depends(get_header_token)] = None) -> str:
   return verify_token(token, AUTH_SETTINGS.ACCESS_TOKEN_SECRET, "access")
 
-def get_current_user(user_id: Annotated[str, Depends(login_with_header)]) -> str:
-  db_session = get_db_session()
+def get_current_user(
+  user_id: Annotated[str, Depends(login_with_header)],
+  db_session: Annotated[Session, Depends(get_db_session)]
+) -> User:
   user = db_session.query(User).filter(User.id == user_id).first()
   if not user:
     raise HTTPException(status_code=404, detail="User not found")
