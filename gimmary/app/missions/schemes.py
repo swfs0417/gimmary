@@ -31,3 +31,19 @@ class GroupMissionResponse(BaseModel):
   mission_id: int
   group_id: int
   status: str
+
+
+# ── Submission 응답 (사진 제출 + 모델 생성 결과) ─────────────────
+class SubmissionDetails(BaseModel):
+  uploaded: bool
+  total_members: int
+  submitted_users: int
+  model_generated: bool | None = None
+  download_url: str | None = None
+  log: str | None = None
+  error: str | None = None
+
+
+class SubmissionResponse(BaseModel):
+  completed: bool
+  details: SubmissionDetails

@@ -134,3 +134,12 @@ class MatchRequest(Base):
     target_user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     status = Column(String(20), default=MatchStatus.PENDING.value)  # 'pending', 'accepted', 'rejected'
     created_at = Column(DateTime)
+
+class Pictures(Base):
+    __tablename__ = 'pictures'
+    id = Column(Integer, primary_key=True)
+    group_mission_id = Column(Integer, ForeignKey('group_missions.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
+    url = Column(String(255))
+    uploaded_at = Column(DateTime)
+    user = relationship('User')
