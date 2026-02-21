@@ -68,7 +68,8 @@ def get_group_missions(
             status=mission.status,
             created_at=mission.created_at.isoformat() if mission.created_at else None
         )
-        for mission in group.missions
+        for mission in group.group_missions
+
     ]
     
 @groups_router.get("/{group_id}/members")
