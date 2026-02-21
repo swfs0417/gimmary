@@ -23,10 +23,11 @@ def verify_password(plain_password: str, hashed_password: str) -> None:
 def hash_password(password: str) -> str:
   return argon2.PasswordHasher().hash(password)
 
-def issue_token(user_id: str, lifespan_minutes: int, secret: str) -> str:
+def issue_token(user_id: str, lifespan_minutes: int, secret: str, token_type: str = "access") -> str:
 	header = {'alg': 'HS256'}
 	payload = {
 		'sub': user_id,
+		'type': token_type,
 		'exp': int((datetime.now() + timedelta(minutes=lifespan_minutes)).timestamp())
 	}
 	return str(jwt.encode(header, payload, key=secret), 'utf-8')
