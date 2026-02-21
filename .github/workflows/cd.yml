@@ -1,0 +1,21 @@
+name: Deploy to Production
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy: 
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH to EC2 and deploy
+        uses: appleboy/ssh-action@v1.2.3
+        with:
+          host: ${{ secrets.ALICE_HOST }}
+          username: ${{ secrets.ALICE_USER }}
+          key: ${{ secrets.ALICE_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.ALICE_USER }}/gimmary
+            git pull origin main
+            uv sync
+            uv alembic upgrade head
